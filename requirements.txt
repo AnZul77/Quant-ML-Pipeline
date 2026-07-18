@@ -1,0 +1,38 @@
+# CrowdWisdomTrading Quantitative ML Pipeline
+# Production dependencies
+
+# Core
+pandas>=2.0.0
+numpy>=1.24.0
+scipy>=1.10.0
+PyYAML>=6.0
+
+# Database
+sqlalchemy>=2.0.0
+
+# Machine Learning
+scikit-learn>=1.3.0
+xgboost>=2.0.0
+lightgbm>=4.0.0
+shap>=0.42.0
+optuna>=3.0.0
+
+# Visualization
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# HTTP Client
+httpx>=0.28.0
+
+# CLI
+click>=8.1.0
+
+# Utilities
+joblib>=1.3.0
+tqdm>=4.65.0
+python-dotenv>=1.0.0
+# Browser Automation
+playwright>=1.40.0
+optuna>=3.0.0
+catboost>=1.2.0
+statsmodels>=0.14.0

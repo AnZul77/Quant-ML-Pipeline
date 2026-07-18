@@ -1,0 +1,145 @@
+# ============================================================================
+# CrowdWisdomTrading Quantitative ML Pipeline Configuration
+# ============================================================================
+
+# ---- Project Metadata ----
+project:
+  name: "CrowdWisdomTrading Quant Pipeline"
+  version: "1.0.0"
+  author: "Anshu"
+
+# ---- Database ----
+database:
+  engine: "sqlite"                       # "sqlite" or "postgres"
+  sqlite:
+    path: "data/trading_pipeline.db"
+  postgres:
+    host: "localhost"
+    port: 5432
+    database: "quant_pipeline"
+    user: "quant"
+    password: ""
+
+# ---- Random Seed ----
+seed: 42
+
+# ---- Timezone ----
+timezone:
+  raw_data: "US/Eastern"
+  target: "UTC"
+
+# ---- Paths ----
+paths:
+  data_dir: "data"
+  output_dir: "outputs"
+  raw_logs: "data/trading_logs.csv"
+  cache_dir: "cache"
+
+# ---- Macro Ingestion Configuration ----
+macro_ingestion:
+  providers:
+    - "fred"
+  series_ids:
+    - "CPIAUCSL"   # Consumer Price Index
+    - "CPILFESL"   # Core CPI (Ex Food & Energy)
+    - "UNRATE"     # Unemployment Rate
+    - "GDP"        # Gross Domestic Product
+    - "FEDFUNDS"   # Federal Funds Effective Rate
+    - "PAYEMS"     # Total Nonfarm Payrolls
+    - "DGS10"      # 10-Year Treasury Constant Maturity Rate
+    - "DGS2"       # 2-Year Treasury Constant Maturity Rate
+    - "ICSA"       # Initial Claims
+    - "UMCSENT"    # Univ of Michigan: Consumer Sentiment
+
+# ---- Data Cleaning ----
+cleaning:
+  dedup_window_ms: 500
+  invalid_accounts:
+    - "ACC_TEST"
+    - "ACC_INVALID"
+    - "ACC_DEMO"
+    - "ACC_PAPER"
+
+# ---- Feature Engineering ----
+features:
+  version: "2.0"
+  rolling_windows:
+    short: 5
+    long: 20
+  market_sessions:
+    asia_open: "00:00"
+    asia_close: "09:00"
+    europe_open: "07:00"
+    europe_close: "16:00"
+    us_open: "13:30"
+    us_close: "20:00"
+  macro_proximity_thresholds_minutes:
+    - 30
+    - 60
+    - 120
+
+# ---- Walk-Forward Validation ----
+walk_forward:
+  train_window_days: 30
+  test_window_days: 7
+
+# ---- Model ----
+model:
+  tuner: "optuna"              # "gridsearch" or "optuna"
+  optuna_trials: 20
+  baseline_permutation: "P_DEFAULT"
+  target_column: "pnl"
+  models:
+    - "linear_regression"
+    - "ridge"
+    - "lasso"
+    - "elasticnet"
+    - "random_forest"
+    - "xgboost"
+    - "lightgbm"
+    - "catboost"
+  default_model: "lightgbm"
+  enable_stacking: false       # Set to true to train a StackingRegressor on top of the best base models
+  hyperparameters:
+    ridge:
+      alpha: [0.1, 1.0, 10.0]
+    lasso:
+      alpha: [0.01, 0.1, 1.0]
+    elasticnet:
+      alpha: [0.01, 0.1, 1.0]
+      l1_ratio: [0.2, 0.5, 0.8]
+    random_forest:
+      n_estimators: [50, 100, 200]
+      max_depth: [5, 10, 20]
+      min_samples_split: [2, 5]
+    xgboost:
+      n_estimators: [50, 100, 200]
+      max_depth: [3, 5, 7]
+      learning_rate: [0.01, 0.05, 0.1]
+      subsample: [0.7, 0.8]
+      colsample_bytree: [0.7, 0.8]
+    lightgbm:
+      n_estimators: [50, 100, 200]
+      max_depth: [3, 5, 7]
+      learning_rate: [0.01, 0.05, 0.1]
+      subsample: [0.7, 0.8]
+      colsample_bytree: [0.7, 0.8]
+      num_leaves: [15, 31, 63]
+    catboost:
+      iterations: [50, 100, 200]
+      depth: [4, 6, 8]
+      learning_rate: [0.01, 0.05, 0.1]
+      l2_leaf_reg: [1, 3, 5]
+
+# ---- Evaluation ----
+evaluation:
+  risk_free_rate: 0.0
+  annualization_factor: 252
+  trading_hours_per_day: 8
+
+# ---- Feature Flags ----
+feature_flags:
+  enable_shap: true
+  enable_optuna: false
+  save_models: true
+  generate_report: true
